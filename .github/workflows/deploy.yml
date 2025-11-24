@@ -40,5 +40,15 @@ jobs:
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
 
+    # --------- AUTOMATIC DJANGO MIGRATIONS ---------
+    - name: Run Django Migrations
+      run: |
+        echo "Waiting for pods to be ready..."
+        sleep 20
+        POD=$(kubectl get pods -l app=django-api -o jsonpath="{.items[0].metadata.name}")
+        echo "Running migrations inside pod: $POD"
+        kubectl exec -i $POD -- python manage.py migrate --noinput
+
+    # --------- VERIFY DEPLOYMENT ---------
     - name: Verify Deployment
       run: kubectl get pods -o wide
